@@ -330,14 +330,24 @@ class SelfHealingRAGAgent:
         # Sanitize retrieved documents for clean JSON serialization
         clean_docs = []
         for d in final_docs:
-            meta = {k: v for k, v in d.get("metadata", {}).items() if k != "json_payload"}
+            meta = {
+                k: v for k, v in d.get("metadata", {}).items()
+                if k not in ("json_payload",)
+            }
             clean_docs.append({
                 "chunk_id": str(d.get("chunk_id", "")),
                 "text": str(d.get("text", "")),
+                "child_text": str(d.get("child_text", meta.get("child_text", ""))),
+                "parent_id": str(d.get("parent_id", meta.get("parent_id", ""))),
+                "section_title": str(d.get("section_title", meta.get("section_title", ""))),
+                "expanded_parent": bool(d.get("expanded_parent", False)),
                 "metadata": meta,
                 "payload": d.get("payload", {}),
                 "cosine_sim": float(d.get("cosine_sim", 0.0)),
-                "rerank_score": float(d.get("rerank_score", d.get("cosine_sim", 0.0)))
+                "bm25_score": float(d.get("bm25_score", 0.0)),
+                "rrf_score": float(d.get("rrf_score", 0.0)),
+                "sources": d.get("sources", meta.get("sources", [])),
+                "rerank_score": float(d.get("rerank_score", d.get("cosine_sim", 0.0))),
             })
 
         # Assemble execution report

@@ -1,0 +1,49 @@
+{
+  "cvtest_parent_000_00": {
+    "parent_id": "cvtest_parent_000_00",
+    "section_title": "Document",
+    "text": "Document\n\nMUKESH PATEL SCHOOL",
+    "child_ids": [
+      "cvtest_child_000_00_000_ac1f12"
+    ],
+    "node_ref": "#/body"
+  },
+  "cvtest_parent_001_00": {
+    "parent_id": "cvtest_parent_001_00",
+    "section_title": "ACADEMIC PROFILE",
+    "text": "ACADEMIC PROFILE\n\nB.Tech CSE CGPA 8.5",
+    "child_ids": [
+      "cvtest_child_001_00_000_94d574"
+    ],
+    "node_ref": "#/texts/1"
+  },
+  "cvtest_parent_002_00": {
+    "parent_id": "cvtest_parent_002_00",
+    "section_title": "WORK EXPERIENCE & INTERNSHIPS",
+    "text": "WORK EXPERIENCE & INTERNSHIPS\n\nProject Intern - Fractal Analytics, LLM Studio Team\nImplemented CRAG pipelines with 85-87% accuracy.\nEvaluated LLMs and RAG pipelines using Fractal LLM Studio.",
+    "child_ids": [
+      "cvtest_child_002_00_000_c63604",
+      "cvtest_child_002_00_001_75ee42",
+      "cvtest_child_002_00_002_ff503f"
+    ],
+    "node_ref": "#/texts/3"
+  },
+  "cvtest_parent_003_00": {
+    "parent_id": "cvtest_parent_003_00",
+    "section_title": "SKILLS",
+    "text": "SKILLS\n\nPython, LangChain, Docling",
+    "child_ids": [
+      "cvtest_child_003_00_000_c06eb3"
+    ],
+    "node_ref": "#/texts/7"
+  },
+  "cvtest_parent_pic_f79ba38d": {
+    "parent_id": "cvtest_parent_pic_f79ba38d",
+    "section_title": "Figure",
+    "text": "[Multimodal Vision Analysis] Architectural illustration depicting: 'Document Visual Diagram'. Features components, telemetry interconnects, and structural relationships. Annotations: Architecture Component, Flowchart Diagram.",
+    "child_ids": [
+      "cvtest_child_pic_e3a6d680"
+    ],
+    "node_ref": "#/node/0"
+  }
+}

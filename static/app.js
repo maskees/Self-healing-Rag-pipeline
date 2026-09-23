@@ -483,6 +483,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <span class="node-ref-tag">${ref} · ${label}</span>
               <span class="node-score-badge">${score}</span>
             </div>
+            ${doc.section_title ? `<div class="meta-tag" style="margin-bottom:6px;">Section · ${doc.section_title}${doc.expanded_parent ? ' · parent expanded' : ''}</div>` : ''}
             <div class="node-text-preview">${doc.text}</div>
             ${isMultimodal ? `<div class="multimodal-pill">Vision enriched</div>` : ''}
           </div>

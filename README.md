@@ -101,9 +101,10 @@ Open your browser at **http://127.0.0.1:8000**
 
 ### Ingestion → Embed → Retrieve Flow
 1. Upload / paste text / load sample → Docling JSON nodes extracted  
-2. Each node written as one line in `output/jsonl/*.jsonl` (visible in the sidebar **Docling JSONL Output** panel)  
-3. Nodes embedded with `all-MiniLM-L6-v2` and stored in **ChromaDB**  
-4. Query runs MMR retrieval → Cross-Encoder rerank → LinUCB → answer  
+2. **Parent–child chunking** — children = fine nodes (section-prefixed); parents = full sections (e.g. Work Experience)  
+3. Each child written as one line in `output/jsonl/*.jsonl`; parents saved under `output/parents/`  
+4. Children embedded with MiniLM and stored in **ChromaDB**  
+5. Query runs **BM25 + dense semantic → RRF → MMR → Cross-Encoder → parent expansion** → LinUCB → answer  
 
 ---
 

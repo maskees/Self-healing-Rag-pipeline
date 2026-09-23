@@ -3,10 +3,12 @@ import json
 import uuid
 import base64
 import logging
+import re
 from typing import Dict, Any, List, Optional, Tuple
 import numpy as np
 
 from .config import PipelineConfig
+from .chunking import build_parent_child_chunks, normalize_ws
 
 logger = logging.getLogger(__name__)
 
@@ -289,70 +291,91 @@ class DoclingJSONIngestor:
 
     def extract_chunks_with_payloads(self, doc_dict: Dict[str, Any], doc_id: str) -> List[Dict[str, Any]]:
         """
-        Extract searchable chunks with their full serialized JSON payloads.
-        Supports both dict-keyed and list-based Docling export formats.
+        Parent–child chunking (default):
+          - Parent = section (header + body until next header)
+          - Child  = fine Docling node, section-prefixed for retrieval
         """
-        chunks: List[Dict[str, Any]] = []
+        if not getattr(self.config, "parent_child_enabled", True):
+            return self._extract_flat_chunks(doc_dict, doc_id)
 
-        # 1. Texts
+        chunks, parents_index = build_parent_child_chunks(
+            text_nodes=list(self._iter_nodes(doc_dict.get("texts", {}))),
+            picture_nodes=list(self._iter_nodes(doc_dict.get("pictures", {}))),
+            table_nodes=list(self._iter_nodes(doc_dict.get("tables", {}))),
+            doc_id=doc_id,
+            max_chars=self.config.section_merge_max_chars,
+            table_text_fn=self._table_text,
+            doc_dict=doc_dict,
+        )
+        self._last_parents_index = parents_index
+        return chunks
+
+    def _extract_flat_chunks(self, doc_dict: Dict[str, Any], doc_id: str) -> List[Dict[str, Any]]:
+        chunks: List[Dict[str, Any]] = []
         for ref_id, node in self._iter_nodes(doc_dict.get("texts", {})):
-            text_content = (node.get("text") or node.get("orig") or "").strip()
+            text_content = normalize_ws(node.get("text") or node.get("orig") or "")
             if not text_content:
                 continue
             chunk_id = f"{doc_id}_{uuid.uuid4().hex[:8]}"
             chunks.append({
                 "chunk_id": chunk_id,
                 "text": text_content,
+                "child_text": text_content,
+                "parent_id": chunk_id,
+                "parent_text": text_content,
+                "section_title": "",
+                "chunk_role": "flat",
                 "payload": node,
                 "node_ref": ref_id,
                 "label": node.get("label", "text"),
             })
-
-        # 2. Pictures
         for ref_id, node in self._iter_nodes(doc_dict.get("pictures", {})):
-            text_content = (
-                (node.get("text") or "").strip()
-                or (node.get("image_description") or "").strip()
-                or (node.get("caption") or "").strip()
+            text_content = normalize_ws(
+                (node.get("text") or "")
+                or (node.get("image_description") or "")
+                or (node.get("caption") or "")
+                or f"Image figure: {node.get('name', 'Document Figure')}"
             )
-            if not text_content:
-                text_content = f"Image figure: {node.get('name', 'Document Figure')}"
             chunk_id = f"{doc_id}_pic_{uuid.uuid4().hex[:8]}"
             chunks.append({
                 "chunk_id": chunk_id,
                 "text": text_content,
+                "child_text": text_content,
+                "parent_id": chunk_id,
+                "parent_text": text_content,
+                "section_title": "Figure",
+                "chunk_role": "flat",
                 "payload": node,
                 "node_ref": ref_id,
                 "label": "picture",
             })
-
-        # 3. Tables
         for ref_id, node in self._iter_nodes(doc_dict.get("tables", {})):
-            text_content = self._table_text(node)
+            text_content = normalize_ws(self._table_text(node))
             if not text_content:
                 continue
             chunk_id = f"{doc_id}_tbl_{uuid.uuid4().hex[:8]}"
             chunks.append({
                 "chunk_id": chunk_id,
                 "text": text_content,
+                "child_text": text_content,
+                "parent_id": chunk_id,
+                "parent_text": text_content,
+                "section_title": "Table",
+                "chunk_role": "flat",
                 "payload": node,
                 "node_ref": ref_id,
                 "label": "table",
             })
-
-        # 4. Fallback — flatten body / whole doc if structure yielded nothing
-        if not chunks:
-            raw_summary = json.dumps(doc_dict.get("body", doc_dict), default=str)[:2000]
-            chunk_id = f"{doc_id}_raw_{uuid.uuid4().hex[:8]}"
-            chunks.append({
-                "chunk_id": chunk_id,
-                "text": raw_summary,
-                "payload": doc_dict,
-                "node_ref": "#/root",
-                "label": "root",
-            })
-
+        self._last_parents_index = {}
         return chunks
+
+    def _persist_parents(self, doc_id: str, parents_index: Dict[str, Dict[str, Any]]) -> str:
+        out_dir = getattr(self.config, "parents_output_dir", os.path.join("output", "parents"))
+        os.makedirs(out_dir, exist_ok=True)
+        path = os.path.join(out_dir, f"{doc_id}_parents.json")
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(parents_index, f, ensure_ascii=False, indent=2, default=str)
+        return path
 
     def _safe_metadata_payload(self, payload: Any) -> str:
         """Serialize payload for Chroma metadata, truncating oversized JSON."""
@@ -360,7 +383,6 @@ class DoclingJSONIngestor:
         limit = self.config.max_metadata_bytes
         if len(serialized) <= limit:
             return serialized
-        # Prefer keeping identity fields if payload is a dict
         if isinstance(payload, dict):
             slim = {
                 k: payload.get(k)
@@ -373,10 +395,7 @@ class DoclingJSONIngestor:
         return serialized[:limit]
 
     def write_jsonl(self, chunks: List[Dict[str, Any]], doc_id: str, doc_name: str) -> Dict[str, Any]:
-        """
-        Write one JSON object per line (JSONL) for every extracted Docling node.
-        Returns path + line preview for the UI.
-        """
+        """Write one JSON object per child chunk (JSONL) for the UI."""
         os.makedirs(self.config.jsonl_output_dir, exist_ok=True)
         safe_name = "".join(c if c.isalnum() or c in "-_." else "_" for c in doc_name)
         jsonl_path = os.path.join(self.config.jsonl_output_dir, f"{doc_id}_{safe_name}.jsonl")
@@ -403,7 +422,12 @@ class DoclingJSONIngestor:
                     "doc_name": doc_name,
                     "node_ref": c["node_ref"],
                     "label": c["label"],
+                    "chunk_role": c.get("chunk_role", "child"),
+                    "parent_id": c.get("parent_id", ""),
+                    "section_title": c.get("section_title", ""),
                     "text": c["text"],
+                    "child_text": c.get("child_text", c["text"]),
+                    "parent_text": c.get("parent_text", c["text"]),
                     "payload": _sanitize_payload(c["payload"]),
                     "embedding_dim": self.config.embedding_dim,
                 }
@@ -423,15 +447,14 @@ class DoclingJSONIngestor:
         doc_name: str = "document.json",
         doc_id: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """
-        Ingest an already-parsed Docling dict: enrich → JSONL → embed → ChromaDB.
-        Shared by file/text ingest and seed data.
-        """
+        """Enrich → parent/child chunk → JSONL → embed → ChromaDB."""
         doc_id = doc_id or str(uuid.uuid4().hex[:10])
         name = doc_name or doc_dict.get("name") or "document.json"
 
         enriched_dict = self.enrich_multimodal_nodes(doc_dict)
+        self._last_parents_index = {}
         chunks = self.extract_chunks_with_payloads(enriched_dict, doc_id)
+        parents_index = getattr(self, "_last_parents_index", {}) or {}
 
         if not chunks:
             return {
@@ -439,28 +462,40 @@ class DoclingJSONIngestor:
                 "doc_id": doc_id,
                 "doc_name": name,
                 "num_chunks": 0,
+                "num_parents": 0,
                 "jsonl_lines": [],
                 "embedded": False,
                 "chroma_count": self.collection.count(),
             }
 
-        # Write visible JSONL output
+        parents_path = self._persist_parents(doc_id, parents_index) if parents_index else ""
         jsonl_info = self.write_jsonl(chunks, doc_id, name)
 
-        # Embed with sentence-transformers
         texts = [c["text"] for c in chunks]
-        logger.info(f"Embedding {len(texts)} chunks with {self.config.embedding_model_name}...")
+        logger.info(
+            f"Embedding {len(texts)} children ({len(parents_index)} parents) "
+            f"with {self.config.embedding_model_name}..."
+        )
         embeddings = self.embedding_model.encode(texts, convert_to_numpy=True).tolist()
         emb_dim = len(embeddings[0]) if embeddings else 0
 
         ids = [c["chunk_id"] for c in chunks]
         metadatas = []
         for c in chunks:
+            parent_text = c.get("parent_text") or c["text"]
+            limit = self.config.max_metadata_bytes - 200
+            if len(parent_text) > limit:
+                parent_text = parent_text[:limit] + "…"
             metadatas.append({
                 "doc_id": doc_id,
                 "doc_name": name,
                 "node_ref": c["node_ref"],
                 "label": c["label"],
+                "chunk_role": c.get("chunk_role", "child"),
+                "parent_id": c.get("parent_id", c["chunk_id"]),
+                "section_title": c.get("section_title", ""),
+                "child_text": (c.get("child_text") or c["text"])[:1500],
+                "parent_text": parent_text,
                 "json_payload": self._safe_metadata_payload(c["payload"]),
             })
 
@@ -473,17 +508,20 @@ class DoclingJSONIngestor:
 
         chroma_count = self.collection.count()
         logger.info(
-            f"Ingested {len(chunks)} chunks for '{name}' into ChromaDB "
-            f"(collection size={chroma_count}, emb_dim={emb_dim})."
+            f"Ingested {len(chunks)} children / {len(parents_index)} parents for '{name}' "
+            f"(Chroma size={chroma_count}, emb_dim={emb_dim})."
         )
 
-        # UI-friendly chunk previews (no huge nested blobs twice)
         chunk_previews = [
             {
                 "chunk_id": c["chunk_id"],
                 "node_ref": c["node_ref"],
                 "label": c["label"],
+                "chunk_role": c.get("chunk_role", "child"),
+                "parent_id": c.get("parent_id", ""),
+                "section_title": c.get("section_title", ""),
                 "text": c["text"][:400],
+                "parent_text": (c.get("parent_text") or "")[:500],
                 "payload": c["payload"],
             }
             for c in chunks
@@ -494,11 +532,14 @@ class DoclingJSONIngestor:
             "doc_id": doc_id,
             "doc_name": name,
             "num_chunks": len(chunks),
+            "num_parents": len(parents_index),
+            "chunking": "parent_child" if self.config.parent_child_enabled else "flat",
             "embedded": True,
             "embedding_model": self.config.embedding_model_name,
             "embedding_dim": emb_dim,
             "chroma_collection": self.config.collection_name,
             "chroma_count": chroma_count,
+            "parents_path": parents_path,
             "jsonl_path": jsonl_info["jsonl_path"],
             "jsonl_num_lines": jsonl_info["num_lines"],
             "jsonl_lines": jsonl_info["jsonl_lines"],
@@ -508,9 +549,7 @@ class DoclingJSONIngestor:
         }
 
     def ingest(self, file_path_or_text: str, is_raw_text: bool = False, doc_name: str = "document.txt") -> Dict[str, Any]:
-        """
-        End-to-End Ingestion: Parse → Enrich → JSONL → Embed → Store in ChromaDB.
-        """
+        """Parse → parent/child → JSONL → embed → ChromaDB."""
         name = os.path.basename(file_path_or_text) if not is_raw_text else doc_name
         doc_dict = self.parse_document(file_path_or_text, is_raw_text=is_raw_text, filename=name)
         return self.ingest_docling_dict(doc_dict, doc_name=name)
@@ -597,7 +636,7 @@ class DoclingJSONIngestor:
             )
         except Exception as e:
             logger.warning(f"Chroma clear error: {e}")
-        # Also clear JSONL outputs so UI stays consistent
+        # Also clear JSONL + parent outputs so UI stays consistent
         try:
             out_dir = self.config.jsonl_output_dir
             if os.path.isdir(out_dir):
@@ -606,3 +645,11 @@ class DoclingJSONIngestor:
                         os.remove(os.path.join(out_dir, name))
         except Exception as e:
             logger.warning(f"JSONL clear error: {e}")
+        try:
+            parents_dir = getattr(self.config, "parents_output_dir", "")
+            if parents_dir and os.path.isdir(parents_dir):
+                for name in os.listdir(parents_dir):
+                    if name.endswith("_parents.json"):
+                        os.remove(os.path.join(parents_dir, name))
+        except Exception as e:
+            logger.warning(f"Parents clear error: {e}")

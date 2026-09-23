@@ -31,8 +31,26 @@ class PipelineConfig:
     
     # Reranker
     reranker_model_name: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
-    top_k: int = 3
-    mmr_candidates_multiplier: int = 2  # 2 * K = 6 candidates
+    top_k: int = 5
+    mmr_candidates_multiplier: int = 3  # hybrid pool → MMR down-select
+    mmr_lambda: float = 0.7
+
+    # Hybrid retrieval: BM25 (lexical) + dense semantic → RRF → MMR → Cross-Encoder
+    hybrid_enabled: bool = True
+    bm25_top_n: int = 20
+    semantic_top_n: int = 20
+    rrf_k: int = 60
+    bm25_weight: float = 1.0
+    semantic_weight: float = 1.0
+    # Soft max chars when merging consecutive Docling nodes under one section
+    section_merge_max_chars: int = 900
+    # Parent–child chunking: retrieve fine children, expand to parent sections
+    parent_child_enabled: bool = True
+    parents_output_dir: str = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "output",
+        "parents"
+    )
     
     # LinUCB Contextual Bandit
     # State dimension S_t = [Query Embeddings (384) + Score_avg (1) + Score_max (1)] = 386

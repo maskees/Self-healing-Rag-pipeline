@@ -138,6 +138,7 @@ async def ingest_text(payload: TextInputRequest):
         raise HTTPException(status_code=400, detail="Text content cannot be empty.")
     try:
         res = ingestor.ingest(payload.text, is_raw_text=True, doc_name=payload.title)
+        retriever.invalidate_bm25()
         return res
     except Exception as e:
         logger.error(f"Ingestion error: {e}")
@@ -158,6 +159,7 @@ async def ingest_file(file: UploadFile = File(...)):
             f.write(content)
             
         res = ingestor.ingest(file_path, is_raw_text=False)
+        retriever.invalidate_bm25()
         return res
     except Exception as e:
         logger.error(f"File upload error: {e}")
@@ -202,6 +204,7 @@ async def reset_all():
     ingestor.clear_database()
     bandit_policy.reset()
     ensure_seed_data()
+    retriever.invalidate_bm25()
     return {"status": "success", "message": "Pipeline and database reset."}
 
 # Mount static folder
