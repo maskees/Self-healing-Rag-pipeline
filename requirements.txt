@@ -1,0 +1,28 @@
+# RL-Enhanced Self-Healing CRAG Architecture
+# Core ML & Embedding
+sentence-transformers>=6.0.0
+torch>=2.0.0
+
+# Vector Store
+chromadb>=1.5.0
+
+# Document Parsing
+docling>=2.0.0
+
+# LLM / Groq
+groq>=1.0.0
+
+# Reranker
+flashrank>=0.2.0
+
+# External Search Fallback
+duckduckgo-search>=8.0.0
+
+# Web Framework / API
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+python-multipart>=0.0.9
+
+# Utilities
+numpy>=1.24.0
+python-dotenv>=1.0.0

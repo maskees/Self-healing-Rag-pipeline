@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRAG — Self-Healing Retrieval</title>
+  <meta name="description" content="RL-driven corrective RAG with Docling ingestion, ChromaDB retrieval, and LinUCB policy." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Sora:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="logo-area">
+      <div class="logo-mark" aria-hidden="true"></div>
+      <div class="logo-text">
+        <div class="brand-title">CRAG</div>
+        <div class="brand-sub">Self-healing retrieval · Docling · LinUCB</div>
+      </div>
+    </div>
+    <div class="header-status-group">
+      <div class="status-chip" id="chromaStatusBadge">
+        <span class="status-dot"></span>
+        <span>ChromaDB</span>
+      </div>
+      <div class="status-chip quiet" id="banditBadge">
+        <span id="banditStepsCount">0 steps</span>
+      </div>
+      <button class="btn-ghost btn-sm" id="btnResetAll" type="button" title="Reset ChromaDB and bandit">
+        Reset
+      </button>
+    </div>
+  </header>
+
+  <main class="main-layout">
+    <aside class="sidebar">
+      <section class="panel">
+        <div class="panel-head">
+          <h2 class="panel-title">Ingest</h2>
+          <span class="meta-tag">Docling → JSONL → Chroma</span>
+        </div>
+
+        <div class="tab-buttons">
+          <button class="tab-btn active" data-tab="uploadTab" type="button">Upload</button>
+          <button class="tab-btn" data-tab="textTab" type="button">Text</button>
+          <button class="tab-btn" data-tab="sampleTab" type="button">Sample</button>
+        </div>
+
+        <div class="tab-contents">
+          <div class="tab-content active" id="uploadTab">
+            <div class="dropzone" id="fileDropzone">
+              <input type="file" id="fileInput" accept=".pdf,.json,.docx,.txt,.png,.jpg,.jpeg" />
+              <div class="dropzone-text">Drop a document</div>
+              <div class="dropzone-sub">PDF, DOCX, TXT, JSON, or image</div>
+            </div>
+            <div id="uploadSelectedFileName" class="file-name-preview hidden"></div>
+            <button class="btn-primary w-full mt-3" id="btnUploadSubmit" type="button" disabled>
+              Parse &amp; embed
+            </button>
+          </div>
+
+          <div class="tab-content" id="textTab">
+            <input type="text" id="manualDocTitle" class="input-field mb-2" placeholder="Document title" />
+            <textarea id="manualDocContent" class="textarea-field" rows="6" placeholder="Paste specification or notes…"></textarea>
+            <button class="btn-primary w-full mt-3" id="btnTextSubmit" type="button">
+              Index nodes
+            </button>
+          </div>
+
+          <div class="tab-content" id="sampleTab">
+            <div class="sample-info-box">
+              <strong>Helios Fusion Spec</strong>
+              <p>Structured Docling nodes with table and multimodal figure metadata for demo retrieval.</p>
+            </div>
+            <button class="btn-primary w-full mt-3" id="btnLoadSampleSpec" type="button">
+              Load sample specification
+            </button>
+          </div>
+        </div>
+
+        <div class="indexed-docs-section mt-4">
+          <div class="sub-section-title">
+            <span>Indexed</span>
+            <span class="count-pill" id="docCountPill">0</span>
+          </div>
+          <div class="doc-list" id="docListContainer">
+            <div class="empty-hint">No documents yet.</div>
+          </div>
+          <div class="chroma-status-line" id="chromaStatusLine">ChromaDB: waiting…</div>
+        </div>
+
+        <div class="indexed-docs-section mt-4">
+          <div class="sub-section-title">
+            <span>JSONL output</span>
+            <span class="count-pill" id="jsonlCountPill">0</span>
+          </div>
+          <div class="jsonl-file-list" id="jsonlFileList">
+            <div class="empty-hint">Appears after ingest.</div>
+          </div>
+          <div class="json-viewer-header mt-2">
+            <span id="jsonlViewerLabel">Latest ingest</span>
+            <button class="btn-ghost btn-xs" id="btnCopyJsonl" type="button">Copy</button>
+          </div>
+          <pre class="json-code-block jsonl-viewer" id="jsonlViewer">Ingest a document to view JSONL nodes…</pre>
+        </div>
+      </section>
+
+      <section class="panel mt-3">
+        <div class="panel-head">
+          <h2 class="panel-title">Policy arms</h2>
+          <span class="meta-tag">α = 0.5 · d = 386</span>
+        </div>
+        <div class="arms-container" id="banditArmsWidget">
+          <div class="arm-row" id="arm0Card">
+            <div class="arm-header">
+              <span class="arm-badge a0">A0</span>
+              <span class="arm-name">Direct</span>
+              <span class="arm-stat" id="a0Count">0</span>
+            </div>
+            <div class="arm-reward-line">Avg <strong id="a0Avg">0.00</strong></div>
+            <div class="arm-bar-bg"><div class="arm-bar-fill a0" id="a0Bar" style="width: 0%"></div></div>
+          </div>
+          <div class="arm-row" id="arm1Card">
+            <div class="arm-header">
+              <span class="arm-badge a1">A1</span>
+              <span class="arm-name">Rewrite</span>
+              <span class="arm-stat" id="a1Count">0</span>
+            </div>
+            <div class="arm-reward-line">Avg <strong id="a1Avg">0.00</strong> · pen −0.10</div>
+            <div class="arm-bar-bg"><div class="arm-bar-fill a1" id="a1Bar" style="width: 0%"></div></div>
+          </div>
+          <div class="arm-row" id="arm2Card">
+            <div class="arm-header">
+              <span class="arm-badge a2">A2</span>
+              <span class="arm-name">External</span>
+              <span class="arm-stat" id="a2Count">0</span>
+            </div>
+            <div class="arm-reward-line">Avg <strong id="a2Avg">0.00</strong> · pen −0.25</div>
+            <div class="arm-bar-bg"><div class="arm-bar-fill a2" id="a2Bar" style="width: 0%"></div></div>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+    <section class="content-area">
+      <section class="panel query-panel">
+        <div class="query-header">
+          <h2 class="panel-title">Ask</h2>
+          <div class="action-mode-selector">
+            <label class="selector-label" for="actionOverrideSelect">Mode</label>
+            <select id="actionOverrideSelect" class="select-field">
+              <option value="auto">Auto · LinUCB</option>
+              <option value="0">Force A0 · Direct</option>
+              <option value="1">Force A1 · Rewrite</option>
+              <option value="2">Force A2 · External</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="query-input-wrap">
+          <textarea id="queryInput" class="query-textarea" rows="2" placeholder="Ask about indexed documents, or try an ambiguous / out-of-domain query…"></textarea>
+          <button class="btn-execute" id="btnExecuteQuery" type="button">
+            <span>Run</span>
+          </button>
+        </div>
+
+        <div class="preset-queries-wrap">
+          <span class="preset-label">Scenarios</span>
+          <button class="preset-btn" type="button" data-query="What is the magnetic field strength and coolant used in the Helios Mark-IV reactor?" data-action="0">
+            In-domain
+          </button>
+          <button class="preset-btn" type="button" data-query="tell me about that fusion chamber picture and coils" data-action="1">
+            Ambiguous
+          </button>
+          <button class="preset-btn" type="button" data-query="What was the latest James Webb Space Telescope discovery regarding exoplanet atmospheres in 2024?" data-action="2">
+            Out-of-domain
+          </button>
+        </div>
+      </section>
+
+      <section class="panel mt-3 pipeline-panel">
+        <div class="panel-head">
+          <h2 class="panel-title">Pipeline</h2>
+          <span id="activeActionBadge" class="action-tag idle">Idle</span>
+        </div>
+
+        <div class="pipeline-steps-grid">
+          <div class="step-node" id="stepNodeMMR">
+            <div class="step-indicator">1</div>
+            <div class="step-body">
+              <div class="step-title">MMR</div>
+              <div class="step-sub">2×K candidates</div>
+              <div class="step-metric" id="mmrMetric">—</div>
+            </div>
+          </div>
+          <div class="step-connector" aria-hidden="true"></div>
+          <div class="step-node" id="stepNodeRerank">
+            <div class="step-indicator">2</div>
+            <div class="step-body">
+              <div class="step-title">Rerank</div>
+              <div class="step-sub">Cross-encoder</div>
+              <div class="step-metric" id="rerankMetric">—</div>
+            </div>
+          </div>
+          <div class="step-connector" aria-hidden="true"></div>
+          <div class="step-node" id="stepNodeState">
+            <div class="step-indicator">3</div>
+            <div class="step-body">
+              <div class="step-title">State S<sub>t</sub></div>
+              <div class="step-sub">386 dims</div>
+              <div class="step-metric" id="stateMetric">—</div>
+            </div>
+          </div>
+          <div class="step-connector" aria-hidden="true"></div>
+          <div class="step-node highlight-node" id="stepNodeBandit">
+            <div class="step-indicator">4</div>
+            <div class="step-body">
+              <div class="step-title">LinUCB</div>
+              <div class="step-sub">Action select</div>
+              <div class="step-metric" id="banditChosenMetric">—</div>
+            </div>
+          </div>
+          <div class="step-connector" aria-hidden="true"></div>
+          <div class="step-node" id="stepNodeAction">
+            <div class="step-indicator">5</div>
+            <div class="step-body">
+              <div class="step-title">Branch</div>
+              <div class="step-sub" id="branchSub">Direct / rewrite / search</div>
+              <div class="step-metric" id="branchMetric">—</div>
+            </div>
+          </div>
+          <div class="step-connector" aria-hidden="true"></div>
+          <div class="step-node" id="stepNodeReward">
+            <div class="step-indicator">6</div>
+            <div class="step-body">
+              <div class="step-title">Reward</div>
+              <div class="step-sub">Judge − penalty</div>
+              <div class="step-metric" id="rewardMetric">—</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="results-grid mt-3">
+        <section class="panel response-panel">
+          <div class="panel-head">
+            <h2 class="panel-title">Answer</h2>
+            <span class="meta-tag" id="synthesizerModelBadge">llama-3.3-70b</span>
+          </div>
+          <div class="response-content" id="responseOutput">
+            <div class="empty-response-placeholder">
+              Run a query to synthesize an answer from retrieved nodes.
+            </div>
+          </div>
+
+          <div class="reward-strip hidden" id="rewardStrip">
+            <div class="reward-stat-item">
+              <span class="stat-label">Judge</span>
+              <span class="stat-val text-accent" id="stripJudgeScore">0.00</span>
+            </div>
+            <div class="reward-operator">−</div>
+            <div class="reward-stat-item">
+              <span class="stat-label">Penalty</span>
+              <span class="stat-val text-warning" id="stripPenalty">0.00</span>
+            </div>
+            <div class="reward-operator">=</div>
+            <div class="reward-stat-item highlight">
+              <span class="stat-label">R<sub>t</sub></span>
+              <span class="stat-val text-success" id="stripNetReward">0.00</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel inspector-panel">
+          <div class="tab-buttons">
+            <button class="tab-btn active" data-tab="retrievedDocsTab" type="button">Retrieved</button>
+            <button class="tab-btn" data-tab="banditMathTab" type="button">LinUCB</button>
+            <button class="tab-btn" data-tab="rawTraceTab" type="button">Trace</button>
+          </div>
+
+          <div class="tab-contents">
+            <div class="tab-content active" id="retrievedDocsTab">
+              <div id="branchNoticeArea" class="branch-notice hidden"></div>
+              <div class="retrieved-nodes-list" id="retrievedNodesList">
+                <div class="empty-hint">No retrieved nodes yet.</div>
+              </div>
+            </div>
+
+            <div class="tab-content" id="banditMathTab">
+              <div class="bandit-math-box">
+                <div class="formula-block">
+                  p<sub>t,a</sub> = θ̂<sub>a</sub>ᵀ x<sub>t,a</sub> + α √(x<sub>t,a</sub>ᵀ A<sub>a</sub>⁻¹ x<sub>t,a</sub>)
+                </div>
+                <div class="math-arms-breakdown" id="mathArmsBreakdown">
+                  <div class="empty-hint">Run a query to inspect arm scores.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="tab-content" id="rawTraceTab">
+              <div class="json-viewer-header">
+                <span>Telemetry</span>
+                <button class="btn-ghost btn-xs" id="btnCopyJson" type="button">Copy</button>
+              </div>
+              <pre class="json-code-block" id="rawJsonTrace">Telemetry appears after a query…</pre>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
