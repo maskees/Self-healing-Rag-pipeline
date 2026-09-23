@@ -1,6 +1,9 @@
 // RL-Enhanced Self-Healing CRAG Frontend Controller
 
 document.addEventListener('DOMContentLoaded', () => {
+  const apiBase = (window.CRAG_API_BASE || '').replace(/\/$/, '');
+  const apiUrl = (path) => `${apiBase}${path}`;
+
   // Elements
   const tabBtns = document.querySelectorAll('.tab-btn');
   const fileDropzone = document.getElementById('fileDropzone');
@@ -144,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
     formData.append('file', selectedUploadFile);
 
     try {
-      const res = await fetch('/api/ingest/upload', {
+      const res = await fetch(apiUrl('/api/ingest/upload'), {
         method: 'POST',
         body: formData
       });
@@ -178,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnTextSubmit.textContent = 'Embed & Index…';
 
     try {
-      const res = await fetch('/api/ingest/text', {
+      const res = await fetch(apiUrl('/api/ingest/text'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text, title })
@@ -204,12 +207,12 @@ document.addEventListener('DOMContentLoaded', () => {
     btnLoadSampleSpec.disabled = true;
     btnLoadSampleSpec.textContent = 'Loading Helios Spec…';
     try {
-      const res = await fetch('/api/reset', { method: 'POST' });
+      const res = await fetch(apiUrl('/api/reset'), { method: 'POST' });
       const data = await res.json();
       await refreshCatalog();
       await updateBanditStats();
       // Load the seeded JSONL into the viewer
-      const jsonlRes = await fetch('/api/jsonl');
+      const jsonlRes = await fetch(apiUrl('/api/jsonl'));
       const jsonlData = await jsonlRes.json();
       if (jsonlData.files && jsonlData.files.length) {
         await loadJsonlFile(jsonlData.files[0].filename);
@@ -231,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 4. Load Indexed Documents Catalog
   async function loadDocumentList() {
     try {
-      const res = await fetch('/api/documents');
+      const res = await fetch(apiUrl('/api/documents'));
       const data = await res.json();
       if (data.documents && data.documents.length) {
         docCountPill.textContent = data.total;
@@ -266,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function loadJsonlCatalog() {
     try {
-      const res = await fetch('/api/jsonl');
+      const res = await fetch(apiUrl('/api/jsonl'));
       const data = await res.json();
       const files = data.files || [];
       jsonlCountPill.textContent = files.length;
@@ -300,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function loadJsonlFile(filename) {
     try {
-      const res = await fetch(`/api/jsonl/${encodeURIComponent(filename)}`);
+      const res = await fetch(apiUrl(`/api/jsonl/${encodeURIComponent(filename)}`));
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || 'Failed to load JSONL');
       renderJsonlRecords(data.records || [], filename);
@@ -349,7 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       activateStepNode(stepNodeMMR);
 
-      const response = await fetch('/api/query', {
+      const response = await fetch(apiUrl('/api/query'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query, forced_action })
@@ -549,7 +552,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 7. Update Bandit Stats Telemetry
   async function updateBanditStats() {
     try {
-      const res = await fetch('/api/bandit/stats');
+      const res = await fetch(apiUrl('/api/bandit/stats'));
       const data = await res.json();
       if (!data || !data.arms) return;
 
@@ -580,7 +583,7 @@ document.addEventListener('DOMContentLoaded', () => {
   btnResetAll.addEventListener('click', async () => {
     if (confirm('Reset ChromaDB collections and LinUCB bandit parameters?')) {
       try {
-        await fetch('/api/reset', { method: 'POST' });
+        await fetch(apiUrl('/api/reset'), { method: 'POST' });
         lastJsonlText = '';
         await refreshCatalog();
         await updateBanditStats();

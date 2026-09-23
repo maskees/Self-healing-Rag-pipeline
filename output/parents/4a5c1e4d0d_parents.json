@@ -1,0 +1,168 @@
+{
+  "4a5c1e4d0d_parent_000_00": {
+    "parent_id": "4a5c1e4d0d_parent_000_00",
+    "section_title": "Document",
+    "text": "Document\n\nMUKESH PATEL SCHOOL OF TECHNOLOGY MANAGEMENT & ENGINEERING",
+    "child_ids": [
+      "4a5c1e4d0d_child_000_00_000_8be677"
+    ],
+    "node_ref": "#/body"
+  },
+  "4a5c1e4d0d_parent_001_00": {
+    "parent_id": "4a5c1e4d0d_parent_001_00",
+    "section_title": "ACADEMIC PROFILE",
+    "text": "ACADEMIC PROFILE",
+    "child_ids": [
+      "4a5c1e4d0d_child_001_00_hdr_0ec119"
+    ],
+    "node_ref": "#/texts/1"
+  },
+  "4a5c1e4d0d_parent_002_00": {
+    "parent_id": "4a5c1e4d0d_parent_002_00",
+    "section_title": "WORK EXPERIENCE & INTERNSHIPS",
+    "text": "WORK EXPERIENCE & INTERNSHIPS\n\nProject Intern - Fractal Analytics, LLM Studio Team | Python, LangChain, Docling May '26 - Aug 31, '26 · Mumbai\nImplemented and tested Corrective RAG (CRAG) pipelines, achieving an evaluated accuracy score of 85-87% across complex query benchmarks.\nEvaluated multiple Large Language Models (LLMs) and Retrieval-Augmented Generation (RAG) pipelines using Fractal LLM Studio across diverse industrial datasets.\nAssessed model performance and optimized architectural trade-offs by benchmarking response quality, latency, and system accuracy to identify best-performing deployment solutions.\nProfessional Athlete & Representative - All India Pickleball Association (AIPA), Maharashtra Feb '25 - Present",
+    "child_ids": [
+      "4a5c1e4d0d_child_002_00_000_b1e926",
+      "4a5c1e4d0d_child_002_00_001_9280f2",
+      "4a5c1e4d0d_child_002_00_002_109e91",
+      "4a5c1e4d0d_child_002_00_003_df569f",
+      "4a5c1e4d0d_child_002_00_004_316b4c"
+    ],
+    "node_ref": "#/texts/2"
+  },
+  "4a5c1e4d0d_parent_002_01": {
+    "parent_id": "4a5c1e4d0d_parent_002_01",
+    "section_title": "WORK EXPERIENCE & INTERNSHIPS",
+    "text": "WORK EXPERIENCE & INTERNSHIPS\n\nCompete at the national level representing Maharashtra, maintaining a strong DUPR rating of 4.45 in singles competition through targeted athletic conditioning and agility circuits utilizing physical ankle weights.",
+    "child_ids": [
+      "4a5c1e4d0d_child_002_01_000_d4a8be"
+    ],
+    "node_ref": "#/texts/2"
+  },
+  "4a5c1e4d0d_parent_003_00": {
+    "parent_id": "4a5c1e4d0d_parent_003_00",
+    "section_title": "TECHNICAL PROJECTS",
+    "text": "TECHNICAL PROJECTS",
+    "child_ids": [
+      "4a5c1e4d0d_child_003_00_hdr_704978"
+    ],
+    "node_ref": "#/texts/9"
+  },
+  "4a5c1e4d0d_parent_004_00": {
+    "parent_id": "4a5c1e4d0d_parent_004_00",
+    "section_title": "2D Video to 3D Layered Asset Pipeline | Computer Vision, PyTorch, Autodesk Maya",
+    "text": "2D Video to 3D Layered Asset Pipeline | Computer Vision, PyTorch, Autodesk Maya\n\nJul '26 - Present\nDeveloped a computer vision workflow utilizing deep learning reconstruction frameworks to convert standard 2D environmental video footage into layered 3D models compatible with professional editing software like Maya.",
+    "child_ids": [
+      "4a5c1e4d0d_child_004_00_000_db179a",
+      "4a5c1e4d0d_child_004_00_001_c795d8"
+    ],
+    "node_ref": "#/texts/10"
+  },
+  "4a5c1e4d0d_parent_005_00": {
+    "parent_id": "4a5c1e4d0d_parent_005_00",
+    "section_title": "AI-Based Loan Eligibility & Credit Decision System | Python, Scikit-Learn, Algorithmic Modeling",
+    "text": "AI-Based Loan Eligibility & Credit Decision System | Python, Scikit-Learn, Algorithmic Modeling\n\nJun '26\nEngineered a predictive credit risk classification model trained on a massive Kaggle dataset comprising 300,000 records and 120,000 features; achieved statistical reliability with an AUCROC > 0.85 and an F1-Score ≥ 0.80.",
+    "child_ids": [
+      "4a5c1e4d0d_child_005_00_000_5400b7",
+      "4a5c1e4d0d_child_005_00_001_0caa35"
+    ],
+    "node_ref": "#/texts/13"
+  },
+  "4a5c1e4d0d_parent_006_00": {
+    "parent_id": "4a5c1e4d0d_parent_006_00",
+    "section_title": "Real-Time Sign Language Detection | Deep Learning, CNNs, VGG16, OpenCV",
+    "text": "Real-Time Sign Language Detection | Deep Learning, CNNs, VGG16, OpenCV\n\nJul '25 - Nov '25\nDeployed a real-time computer vision architecture utilizing convolutional neural networks and VGG16 backbones to detect and classify complex spatial hand gestures with sub-second latency.\nSiamese Neural Network for One-Shot Learning | PyTorch, TensorFlow, Deep Learning Aug '25 - Sep '25\nDesigned and trained a custom Siamese neural network architecture to execute one-shot image verification and similarity scoring across highly constrained training datasets.",
+    "child_ids": [
+      "4a5c1e4d0d_child_006_00_000_81acd3",
+      "4a5c1e4d0d_child_006_00_001_35725b",
+      "4a5c1e4d0d_child_006_00_002_1b1ae2",
+      "4a5c1e4d0d_child_006_00_003_8571b8"
+    ],
+    "node_ref": "#/texts/16"
+  },
+  "4a5c1e4d0d_parent_007_00": {
+    "parent_id": "4a5c1e4d0d_parent_007_00",
+    "section_title": "Text Similarity QA System | NLP, Sentence Embeddings, Cosine Similarity",
+    "text": "Text Similarity QA System | NLP, Sentence Embeddings, Cosine Similarity\n\nAug '24\nBuilt an end-to-end semantic QA pipeline utilizing vector embeddings and cosine similarity metrics to accurately match unstructured user queries against structured knowledge bases (Datathon Finalist Project).",
+    "child_ids": [
+      "4a5c1e4d0d_child_007_00_000_9bb02c",
+      "4a5c1e4d0d_child_007_00_001_4736c2"
+    ],
+    "node_ref": "#/texts/21"
+  },
+  "4a5c1e4d0d_parent_008_00": {
+    "parent_id": "4a5c1e4d0d_parent_008_00",
+    "section_title": "Automated Pickleball Recycling & Remolding Machine | Hardware Engineering, Cost Optimization",
+    "text": "Automated Pickleball Recycling & Remolding Machine | Hardware Engineering, Cost Optimization\n\nApr '26\nDesigned an integrated hardware-mechanical engineering system for recycling and remolding damaged polymer balls, optimizing the technical manufacturing process under strict economic cost constraints.\nFull-Stack Amazon Clone | Web Development, Full-Stack Architecture Nov '23 - Dec '23\nReplicated core e-commerce functionalities of Amazon, building responsive product listing interfaces, dynamic cart management, and seamless checkout workflows.",
+    "child_ids": [
+      "4a5c1e4d0d_child_008_00_000_fff351",
+      "4a5c1e4d0d_child_008_00_001_2abfbd",
+      "4a5c1e4d0d_child_008_00_002_3b619a",
+      "4a5c1e4d0d_child_008_00_003_a17d39"
+    ],
+    "node_ref": "#/texts/24"
+  },
+  "4a5c1e4d0d_parent_009_00": {
+    "parent_id": "4a5c1e4d0d_parent_009_00",
+    "section_title": "TECHNICAL SKILLS & COMPETENCIES",
+    "text": "TECHNICAL SKILLS & COMPETENCIES\n\nLanguages & Databases: Python, SQL, Git, Bash\nCore Engineering: Data Structures & Algorithms (DSA), Query Optimization, Algorithmic Problem Solving\nRelevant Coursework: Evolutionary Computing, Robotics, Kinematics, Artificial Intelligence\nAI/ML & Frameworks: PyTorch, TensorFlow, Machine Learning, Deep Learning (CNNs, Siamese Networks, VGG16), Computer Vision, NLP, LangChain, Docling, Scikit-Learn\nCertifications: AWS APAC Solutions Architecture (Forage) · Build RAG Applications (IBM/Coursera) · Developing GenAI Applications (IBM)\nSoft Skills: Leadership & Team Management, Performing Under Pressure, Competitive Discipline & Athletic Mindset (National-Level Sport), Public Speaking & Communication",
+    "child_ids": [
+      "4a5c1e4d0d_child_009_00_000_28dc83",
+      "4a5c1e4d0d_child_009_00_001_8b3163",
+      "4a5c1e4d0d_child_009_00_002_7096e3",
+      "4a5c1e4d0d_child_009_00_003_df475c",
+      "4a5c1e4d0d_child_009_00_004_53ead9",
+      "4a5c1e4d0d_child_009_00_005_4724b8"
+    ],
+    "node_ref": "#/texts/29"
+  },
+  "4a5c1e4d0d_parent_010_00": {
+    "parent_id": "4a5c1e4d0d_parent_010_00",
+    "section_title": "ACHIEVEMENTS & LEADERSHIP",
+    "text": "ACHIEVEMENTS & LEADERSHIP\n\nGlobal & National Competitions: National Finalist at Smart India Hackathon (Govt. of India, 2025) · Finalist at Datathon Hackathon (2025) · Participant at Agloutsav Hackathon (NIT Rourkela, 2025)\nHonors & Scholarships: Recipient of the prestigious College Fee Scholarship by College Board (2024) · Awarded Best Brand Ambassador at Designare (2023-24) · Best Delegate at RIS MUN",
+    "child_ids": [
+      "4a5c1e4d0d_child_010_00_000_f8ef28",
+      "4a5c1e4d0d_child_010_00_001_838414"
+    ],
+    "node_ref": "#/texts/36"
+  },
+  "4a5c1e4d0d_parent_011_00": {
+    "parent_id": "4a5c1e4d0d_parent_011_00",
+    "section_title": "SHAKSHAM MEHRA",
+    "text": "SHAKSHAM MEHRA",
+    "child_ids": [
+      "4a5c1e4d0d_child_011_00_hdr_a0efd6"
+    ],
+    "node_ref": "#/texts/39"
+  },
+  "4a5c1e4d0d_parent_012_00": {
+    "parent_id": "4a5c1e4d0d_parent_012_00",
+    "section_title": "MPSTME, NMIMS University · Major in Artificial Intelligence",
+    "text": "MPSTME, NMIMS University · Major in Artificial Intelligence\n\nAI Engineer & Researcher · Hackathon Finalist · Professional Pickleball Athlete +91 9967473260 · mehrashaksham@gmail.com · LinkedIn · GitHub\n0\nAthletic Excellence: Bronze Medallist at National U19 Pickleball Championship · Selected by AIPA to represent India internationally at the Asian Open Pickleball Championship (AOPC) in Vietnam\nPositions of Responsibility: Executive at Technical & Research Cell, NMIMS (organized workshops and talks for 15+ member team, 2023-25) · Logistics Executive for Taqneeq Annual Tech Fest (2023-24) · Team Lead Manager at Designare (2023-24) · Tournament Director at MAKS Pickleball Mumbai · Assisting Director for RIS Production",
+    "child_ids": [
+      "4a5c1e4d0d_child_012_00_000_6f6e60",
+      "4a5c1e4d0d_child_012_00_001_a0e0af",
+      "4a5c1e4d0d_child_012_00_002_1aaf19",
+      "4a5c1e4d0d_child_012_00_003_ef0de2"
+    ],
+    "node_ref": "#/texts/40"
+  },
+  "4a5c1e4d0d_parent_pic_bfb37f37": {
+    "parent_id": "4a5c1e4d0d_parent_pic_bfb37f37",
+    "section_title": "Figure",
+    "text": "[Multimodal Vision Analysis] Architectural illustration depicting: 'Document Visual Diagram'. Features components, telemetry interconnects, and structural relationships. Annotations: .",
+    "child_ids": [
+      "4a5c1e4d0d_child_pic_e3a54ade"
+    ],
+    "node_ref": "#/pictures/0"
+  },
+  "4a5c1e4d0d_parent_tbl_becf807f": {
+    "parent_id": "4a5c1e4d0d_parent_tbl_becf807f",
+    "section_title": "Table",
+    "text": "Table Data: [[{\"bbox\": {\"l\": 31.3161197925, \"t\": 114.37427445807111, \"r\": 44.249278652653125, \"b\": 122.81399242601083, \"coord_origin\": \"TOPLEFT\"}, \"row_span\": 1, \"col_span\": 1, \"start_row_offset_idx\": 0, \"end_row_offset_idx\": 1, \"start_col_offset_idx\": 0, \"end_col_offset_idx\": 1, \"text\": \"Year\", \"column_header\": true, \"row_header\": false, \"row_section\": false, \"fillable\": false}, {\"bbox\": {\"l\": 76.04887565068358, \"t\": 114.37427445807111, \"r\": 118.21941415299422, \"b\": 122.81399242601083, \"coord_origin\": \"TOPLEFT\"}, \"row_span\": 1, \"col_span\": 1, \"start_row_offset_idx\": 0, \"end_row_offset_idx\": 1, \"start_col_offset_idx\": 1, \"end_col_offset_idx\": 2, \"text\": \"Degree / Exam\", \"column_header\": true, \"row_header\": false, \"row_section\": false, \"fillable\": false}, {\"bbox\": {\"l\": 271.79631847224607, \"t\": 114.37427445807111, \"r\": 296.1594571540786, \"b\": 122.81399242601083, \"coord_origin\": \"TOPLEFT\"}, \"row_span\": 1, \"col_span\": 1, \"start_row_offset_idx\": 0, \"end_row_offset_idx\": 1, \"start_col_offset_idx\": 2, \"end_col_offset_idx\": 3, \"text\": \"Institute\", \"column_header\": true, \"row_header\": false, \"row_section\": false, \"fillable\": false}, {\"bbox\": {\"l\": 456.78593411519535, \"t\": 114.3742744580711…",
+    "child_ids": [
+      "4a5c1e4d0d_child_tbl_f197c349"
+    ],
+    "node_ref": "#/tables/0"
+  }
+}
